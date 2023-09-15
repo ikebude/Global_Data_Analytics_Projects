@@ -1,0 +1,249 @@
+---
+title: "Weather Data Analysis"
+author: 
+output:
+  pdf_document:
+    fig_caption: yes
+    number_sections: yes
+    keep_tex: yes
+  word_document: default
+  html_document: default
+---
+*******************************************************************************************
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r}
+load(file = "King.RData")
+```
+```{r}
+pacman::p_load(pacman, dplyr, GGally, ggplot2, ggthemes, 
+               ggvis, httr, lubridate, plotly, rio, rmarkdown, shiny, 
+               stringr, tidyr, reticulate, tidyverse, psych)
+```
+**********************************************************************************
+# The Weather Dataset
+
+Here, The Weather Dataset is a time-series data set with per-hour information about the weather conditions at a particular location. It records Temperature, Dew Point Temperature, Relative Humidity, Wind Speed, Visibility, Pressure, and Conditions.
+
+This data is available as a CSV file.
+
+```{r}
+WeatherDataset
+```
+
+## .head()
+It shows the first N rows in the data (by default, N=5).
+
+```{r}
+WeatherDataset |> 
+  head()
+```
+
+## .shape
+
+It shows the total no. of rows and no. of columns of the dataframe.
+
+```{python}
+r.WeatherDataset.shape
+```
+
+## .index
+
+This attribute provides the index of the dataframe.
+
+```{python}
+r.WeatherDataset.index
+```
+
+## .columns
+
+It shows the name of each column.
+
+```{r}
+WeatherDataset |> 
+  colnames()
+```
+
+## .dtypes
+
+It shows the data-type of each column.
+
+```{r}
+WeatherDataset |> 
+  str()
+```
+
+with python code the output is
+
+```{python}
+r.WeatherDataset.dtypes
+```
+
+## .unique()
+
+In a column, it shows all the unique values. It can be applied on a single column only, not on the whole dataframe.
+
+```{r}
+unique(WeatherDataset$Weather)
+```
+## .is.na
+
+SHow the total number of non-null Values in each column. It can be applied in both the Dataframe and a single column
+
+```{r}
+sum(is.na(WeatherDataset$Weather))
+```
+In a column, it shows all the unique values with their count. It can be applied on single column only.
+
+```{python}
+r.WeatherDataset["Weather"].value_counts()
+```
+
+## .count
+```{r}
+WeatherDataset |> 
+  count()
+```
+
+## .info()
+
+Provides basic information about the dataframe.
+
+```{r}
+WeatherDataset |> 
+  describe()
+```
+Lets Dive into Answering Some Useful Analysis Questions
+
+-----------------------------------------------------------------------------------------------------------
+# Weather Analysis
+
+## Q) 1.  Find all the unique 'Wind Speed' values in the data.
+```{r}
+WeatherDataset |> 
+  count(`Wind Speed_km/h`)
+```
+Using Unique
+```{r}
+unique(WeatherDataset$`Wind Speed_km/h`)
+```
+## Q) 2. Find the number of times when the 'Weather is exactly Clear'.
+```{r}
+WeatherDataset |> 
+  filter(Weather == 'Clear') |> 
+  count()
+```
+```{r}
+WeatherDataset |> 
+  filter(Weather == 'Clear')
+```
+## Q) 3. Find the number of times when the 'Wind Speed was exactly 4 km/h'.
+```{r}
+WeatherDataset |> 
+  filter(`Wind Speed_km/h` == 4) |> 
+  count()
+```
+
+```{r}
+WeatherDataset |> 
+  filter(`Wind Speed_km/h` == 4)
+```
+## Q. 4) Find out all the Null Values in the data.
+```{r}
+WeatherDataset |> 
+  is.null()
+```
+This means that there are no null Values in the dataset
+## Q. 5) Rename the column name 'Weather' of the dataframe to 'Weather Condition'.
+```{r}
+WeatherDataset |> 
+  rename('Weather_Dataset' = 'Weather') |> 
+  colnames()
+```
+## Q.6) What is the mean 'Visibility' ?
+```{r}
+WeatherDataset |> 
+  describe()
+```
+Singularly
+```{r}
+mean(WeatherDataset$Visibility_km)
+```
+## Q. 7) What is the Standard Deviation of 'Pressure'  in this data?
+```{r}
+sd(WeatherDataset$Press_kPa)
+```
+## Q. 8) Whats is the Variance of 'Relative Humidity' in this data ?
+```{r}
+var(WeatherDataset$`Rel Hum_%`)
+```
+## Q. 9) Find all instances when 'Snow' was recorded.
+looking for just the Instance "Snow"
+```{r}
+WeatherDataset |> 
+  filter(`Weather` == 'Snow')
+```
+But when we want to get all the columns that has "Snow" in it we use ```grepl``` in R and ```str.contains``` in python
+```{r}
+WeatherDataset |> 
+  filter(grepl('Snow', Weather))
+```
+## Q. 10) Find all instances when 'Wind Speed is above 24' and 'Visibility is 25'.
+```{r}
+WeatherDataset |> 
+  filter((Visibility_km == 25) & ('Wind Speed_km/h' > 24))
+```
+## Q. 11) What is the Mean value of each column against each 'Weather Conditon' ?
+```{r}
+WeatherDataset |> 
+  group_by(Weather) |> 
+  summarise(across(Temp_C:Press_kPa, mean))
+```
+Though the code is longer using R, Python makes It Easy for us
+```{python echo=TRUE}
+r.WeatherDataset.drop('Date/Time', axis=1).groupby('Weather').mean()
+```
+The Date/Time column is recorded as a calculated column, so we hav to drop it
+## Q. 12) What is the Minimum & Maximum value of each column against each 'Weather Conditon' ?
+```{r}
+WeatherDataset |> 
+  group_by(Weather) |> 
+  summarise(across(Temp_C:Press_kPa, min))
+```
+The Above is for the Minimun, The Maximum numbers include
+```{r}
+WeatherDataset |> 
+  group_by(Weather) |> 
+  summarise(across(Temp_C:Press_kPa, max))
+```
+Lets try python code
+```{python echo=TRUE}
+r.WeatherDataset.groupby('Weather').min()
+```
+## Q. 13) Show all the Records where Weather Condition is Fog.
+```{r echo=TRUE}
+WeatherDataset |> 
+  filter(Weather == 'Fog')
+```
+## Q. 14) Find all instances when 'Weather is Clear' or 'Visibility is above 40'.
+```{r echo=TRUE}
+WeatherDataset |> 
+  filter((Visibility_km > 40) & grepl('Clear', Weather))
+```
+## Q. 15) Find all instances when :
+### A. 'Weather is Clear' and 'Relative Humidity is greater than 50'
+### or
+### B. 'Visibility is above 40'
+```{r}
+WeatherDataset |> 
+  filter(grepl('Clear', Weather) & (`Rel Hum_%` > 50) | (Visibility_km > 40))
+```
+
+We have come to the End of the Descriptive Analysis.
+
+
+By Precious Ikebude.
+
+***********************************************************************
