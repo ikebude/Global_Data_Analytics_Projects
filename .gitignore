@@ -1,0 +1,5 @@
+
+# ignone the following files
+*.tex
+*.Rhistory
+*.RData
