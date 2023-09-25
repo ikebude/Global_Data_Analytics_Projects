@@ -1,0 +1,103 @@
+---
+title: "Covid 19 Data Analysis"
+output:
+  html_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, include=FALSE}
+pacman::p_load(pacman, dplyr, GGally, ggplot2, ggthemes, 
+               ggvis, httr, lubridate, plotly, rio, rmarkdown, shiny, 
+               stringr, tidyr, reticulate, tidyverse, psych)
+```
+
+# COVID 19 Dataset
+
+We have taken a small dataset of Covid-19, just for your understaning purpose. You have to work on the original dataset which contains about 19000 rows. The data used here is till 29-April-2020 and has records as on 29-April-2020. This data is available as a CSV file, downloaded from Kaggle. We will analyze this data.
+
+```{r include=FALSE}
+covid <- read_csv("C:/Users/user/Projects/Data-Analysis-Projects/Covid 19 Data Analysis/CovidData.csv")
+```
+
+```{r}
+head(covid)
+```
+
+```{r}
+describe(covid)
+```
+
+```{r}
+covid |> colnames()
+```
+
+```{r}
+covid |> str()
+```
+
+```{r}
+is.na(covid) |> colSums()
+```
+
+## \### Lets run some Analysis to view somw certain Updates. Firstly we would want to see the heatmap of the null values.
+
+```{python}
+import seaborn as sns
+import matplotlib.pyplot as plt
+sns.heatmap(r.covid.isnull())
+plt.show()
+```
+
+## Lets go into solving real life Questions.
+
+### Q.1 ) Show the number of Confirmed , Deaths and Recovered cases in each Region.
+
+```{r}
+covid |> group_by(Region) |> reframe(COnfirmed = sum(Confirmed), Deaths = sum(Deaths), Recovered = sum(Recovered))
+```
+
+### Q2) Remove all the records where Confirmed Cases is Less Than 10.
+
+```{r}
+covids <- covid |> filter(Confirmed > 10)
+```
+
+```{r}
+covids
+```
+
+### Q.3) In which Region, maximum number of Confirmed cases were recorded ?
+
+```{r}
+covid |> group_by(Region) |> summarise(Confirmed = sum(Confirmed)) |> arrange(desc(Confirmed))
+```
+
+### Q.4) In which Region, minimum number of Deaths cases were recorded ?
+
+```{r}
+covid |> group_by(Region) |> summarise(Deaths = sum(Deaths)) |> arrange((Deaths)) |> print(n = 5)
+```
+
+### Q.5) How many Confirmed , Deaths & Recovered cases were reported from India till 29 April 2020?
+
+```{r}
+covid |> filter(Region == 'India')
+```
+
+### Q. 6-A ) Sort the entire data wrt No. of Confirmed cases in ascending order
+
+```{r}
+covids |> arrange(Confirmed) |> print(n = 5)
+```
+
+### Q. 6-B ) Sort the entire data wrt No. of Recovered cases in descending order.
+
+```{r}
+covid |> arrange(desc(Recovered)) |>  print(n = 10)
+```
+
+## \### We have come to an End.
