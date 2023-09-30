@@ -37,8 +37,6 @@ sum(is.na(WeatherDataset$Weather))
 sum(is.na(WeatherDataset))
 #9 Showing all unique Values with their count. It can be applied on a single column only
 WeatherDataset |> 
-  count(Weather)
-WeatherDataset |> 
   count()
 #10 Provide Basic Information About The Data Frame
 WeatherDataset |> 
@@ -88,7 +86,7 @@ WeatherDataset |>
 WeatherDataset |> 
   filter(Weather == 'Snow')
 WeatherDataset |> 
-  select(, contains('S'))
+  select(Weather, contains('S'))
 WeatherDataset |> 
   filter(grepl('Snow', Weather)) |> 
   count()
